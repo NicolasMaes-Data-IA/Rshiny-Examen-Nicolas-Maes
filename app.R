@@ -17,9 +17,14 @@ ui <- fluidPage(
     
     sidebarPanel(
       selectInput(inputId = "Couleurs",
-                  label = "Choisir la couleur :",
+                  label = "Choisir une couleur à filtrer :",
                   choices = c("D", "E", "F", "G", "H", "I", "J"),
-                  selected = "D")
+                  selected = "D"),
+      sliderInput(inputId = "prix",
+                  label = "Prix maximum :",
+                  min = 0,
+                  max = 20000,
+                  value = 5000),
     ), 
     
     
@@ -31,8 +36,13 @@ ui <- fluidPage(
 
 # GESTION SERVEUR
 server <- function(input, output) {
-  
-    observeEvent(input$bouton)
+    
+    rv <- reactiveValues(df = diamonds, choix_rose = "Non")
+    
+    observeEvent(input$bouton,
+                 rv$df <- diamonds |> 
+                 filter(color == input$Couleurs) |> 
+                 filter(price <= input$prix))
 
     output$distPlot <- renderPlot({
         x    <- faithful[, 2]
