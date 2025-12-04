@@ -16,15 +16,25 @@ ui <- fluidPage(
   sidebarLayout(
     
     sidebarPanel(
+      
+      radioButtons(inputId = "rose",
+                   label = "Colorier en rose ?",
+                   choices = c("Oui", "Non"),
+                   selected = "Non"),
+      
       selectInput(inputId = "Couleurs",
                   label = "Choisir une couleur à filtrer :",
-                  choices = c("D", "E", "F", "G", "H", "I", "J"),
+                  choices = levels(diamonds$color),
                   selected = "D"),
+      
       sliderInput(inputId = "prix",
                   label = "Prix maximum :",
                   min = 0,
                   max = 20000,
                   value = 5000),
+      
+      actionButton(inputId = "bouton", 
+                   label = "Valider")
     ), 
     
     
