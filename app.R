@@ -5,6 +5,7 @@ library(shinylive)
 library(DT)
 library(bslib)
 library(thematic)
+library(plotly)
 
 data("diamonds")
 
@@ -34,12 +35,13 @@ ui <- fluidPage(
                   value = 5000),
       
       actionButton(inputId = "bouton", 
-                   label = "Valider")
+                   label = "Visualiser le graph")
     ), 
     
     
     mainPanel(
-      plotOutput("distPlot")
+      plotlyOutput("distPlot"),
+      DTOutput("monTableau")
     )
   ) 
 ) 
@@ -49,19 +51,25 @@ server <- function(input, output) {
     
     rv <- reactiveValues(df = diamonds, choix_rose = "Non")
     
-    observeEvent(input$bouton,
-                 rv$df <- diamonds |> 
-                 filter(color == input$Couleurs) |> 
-                 filter(price <= input$prix))
-
-    output$distPlot <- renderPlot({
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
+    observeEvent(input$bouton, {
+      rv$df <- diamonds |> 
+        filter(color == input$Couleurs) |> 
+        filter(price <= input$prix)
+      rv$choix_rose <- input$rose
+      
+    })
+                 
+    output$distPlot <- renderPlotly({
+      couleur_point <- ifelse(rv$choix_rose == "Oui", "pink", "black")
+      g <- ggplot(rv$df, aes(x = carat, y = price)) +
+        geom_point(color = couleur_point) +
+        theme_minimal() +
+        labs(title = paste("Diamants couleur", input$Couleurs))
+      ggplotly(g)
+    })
+    
+    output$monTableau <- renderDT({
+      rv$df
     })
 }
 
